@@ -27,9 +27,8 @@ def main():
     print(animal_list[1].position)
     animal_list[1].move(animal_list, alpha)
     print(animal_list[1].position)
-
-    # animal_list[1].getNeighborVectors(animal_list)
-
+    print(getDirections(animal_list)
+    animal_list[1].attraction(animal_list, alpha)
 
 # Creating an object called Animal
 class Animal:
@@ -54,6 +53,11 @@ class Animal:
                 unit_vectors[i] = unitVectorize(within_alpha[i])
             self.position = unitVectorize(-1 * sum(unit_vectors)) * self.speed + self.position
 
+    def attraction(self, animal_list, alpha):
+        old_self = self.position
+        new_self = animal_list[self].move(animal_list, alpha)
+        if(old_self == new_self):
+            self.position = (unitVectorize(-1 * sum(unit_vectors)) * self.speed + self.position) + sum(unitVectorize(getDirections(animal_list)))
 
 # This small function helps us determine the x and y direction vectors. This will be a unit vector.
 def randomDirection():
@@ -65,6 +69,8 @@ def randomDirection():
 def getPositions(animal_list):
     return [o.position for o in animal_list]
 
+def getDirections(animal_list):
+    return [o.direction for o in animal_list]
 
 # this small function returns the distances of the other animals to a chosen animal
 def getHypotenuse(movement_vector):
