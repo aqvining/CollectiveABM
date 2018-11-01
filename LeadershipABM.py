@@ -23,12 +23,12 @@ def main():
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
         animal_list.append(Animal('ANIMAL' + str(num), [uniform(0, 10), uniform(0, 10)], randomDirection(), rand_speed))
 
-    print([getHypotenuse(v) for v in animal_list[1].getNeighborVectors(animal_list)])
+    print(animal_list)
     print(animal_list[1].position)
     animal_list[1].move(animal_list, alpha)
     print(animal_list[1].position)
-    print(getDirections(animal_list)
-    animal_list[1].attraction(animal_list, alpha)
+    print(animal_list)
+
 
 # Creating an object called Animal
 class Animal:
@@ -40,24 +40,28 @@ class Animal:
 
     # def getUserInputs(self, numAnimals, alpha):
 
-    def getNeighborVectors(self, animal_list):
-        vectors = [np.subtract(o.position, self.position) for o in animal_list]
+    def getNeighborVectors(self, neighbor_list):
+        vectors = [np.subtract(o.position, self.position) for o in neighbor_list]
         return vectors
 
     def move(self, animal_list, alpha):
-        neighbor_vectors = self.getNeighborVectors(animal_list)
-        within_alpha = [v for v in neighbor_vectors if getHypotenuse(v) < alpha and getHypotenuse(v) != 0]
+        neighbor_list = animal_list
+        neighbor_list.remove(self)
+        neighbor_vectors = self.getNeighborVectors(neighbor_list)
+        within_alpha = [v for v in neighbor_vectors if getHypotenuse(v) < alpha]
         if len(within_alpha) > 0:
             unit_vectors = [None] * len(within_alpha)
             for i in range(len(within_alpha)):
                 unit_vectors[i] = unitVectorize(within_alpha[i])
-            self.position = unitVectorize(-1 * sum(unit_vectors)) * self.speed + self.position
+            self.direction = unitVectorize(-1 * sum(unit_vectors))
+            self.position = self.direction * self.speed + self.position
+        else:
+            print("attraction")
+            self.attraction(neighbor_vectors, neighbor_list)
 
-    def attraction(self, animal_list, alpha):
-        old_self = self.position
-        new_self = animal_list[self].move(animal_list, alpha)
-        if(old_self == new_self):
-            self.position = (unitVectorize(-1 * sum(unit_vectors)) * self.speed + self.position) + sum(unitVectorize(getDirections(animal_list)))
+    def attraction(self, neighbor_vectors, neighbor_list):
+        self.direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
+        self.position = self.direction * self.speed + self.position
 
 # This small function helps us determine the x and y direction vectors. This will be a unit vector.
 def randomDirection():
