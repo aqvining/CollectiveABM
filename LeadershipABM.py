@@ -38,8 +38,6 @@ class Animal:
         self.direction = direction
         self.speed = speed
 
-    # def getUserInputs(self, numAnimals, alpha):
-
     def getNeighborVectors(self, neighbor_list):
         vectors = [np.subtract(o.position, self.position) for o in neighbor_list]
         return vectors
@@ -62,6 +60,16 @@ class Animal:
     def attraction(self, neighbor_vectors, neighbor_list):
         self.direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
         self.position = self.direction * self.speed + self.position
+
+class informedAnimal(Animal):
+    def __init__(self, name, position, direction, speed=0, omega):
+        Animal.__init__(self, name, position, direction, speed=0)
+        self.speed = speed
+        self.omega = omega
+
+    def informedAttraction(self, neighbor_vectors, neighbor_list, direction, omega):
+        targetDestination = [uniform(0, 10), uniform(0, 10)]
+        self.direction = [np.subtract(targetDestination, self.position)] + omega*unitVectorize(direction)/unitVectorize([np.subtract(targetDestination, self.position)] + omega*unitVectorize(direction))
 
 # This small function helps us determine the x and y direction vectors. This will be a unit vector.
 def randomDirection():
