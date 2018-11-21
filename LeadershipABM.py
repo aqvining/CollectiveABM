@@ -1,4 +1,4 @@
-from random import randint, uniform
+from random import randint, uniform, random, choice
 import collections
 import numpy as np
 from math import pi
@@ -8,22 +8,49 @@ from math import sqrt
 
 
 def main():
-    # The user inputs the number of Animal Objects
-    num_animals = input("Please enter the number of Animals: ")
-    num_animals = int(num_animals)
+    # The user inputs the number of uninformed Animal Objects
+    num_uninformed = input("Please enter the number of uninformed Animals: ")
+    num_uninformed = int(num_uninformed)
+
+    # The user inputs the number of uninformed Animal Objects
+    num_informed = input("Please enter the number of informed Animals: ")
+    num_informed = int(num_informed)
+
+    #The user inputs omega (strength of target direction on informed movement, between 0 and 1)
+    omega = float(input("Please enter the omega value for informed Animals"))
 
     # The user inputs the alpha (the minimum distance value)
     alpha = input("Please enter the alpha: ")
     alpha = float(alpha)
 
+    # The user inputs the alpha (the minimum distance value)
+    num_targets = input("Please enter the number of targets: ")
+    num_targets = int(num_targets)
+
+    # The user inputs the error
+    error = input("Please enter the standard deviation of movement error: ")
+    error = float(error)
+
+    targetDestination_list = []
+    for num in range(0, num_targets):
+        targetDestination_list.append(Target('TARGET' + str(num), [uniform(0, 10), uniform(0, 10)]))
+
     # A list of animals, each having their own individual parameters of name, position, direction, and speed
     # creating a list with all the respective parameters
     animal_list = []
-    for num in range(0, num_animals):
+
+    for num in range(0, num_informed):
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
-        animal_list.append(Animal('ANIMAL' + str(num), [uniform(0, 10), uniform(0, 10)], randomDirection(), rand_speed))
+        target = [0,0]
+        animal_list.append(informedAnimal('ANIMAL' + str(num), [uniform(-5, 5), uniform(-5, 5)], randomDirection(), rand_speed, error, omega, targetDestination_list))
+
+    for num in range(0, num_uninformed):
+        rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
+        animal_list.append(Animal('ANIMAL' + str(num), [uniform(-5, 5), uniform(-5, 5)], randomDirection(), rand_speed, error))
+
 
     print(animal_list)
+    print(targetDestination_list[1].name)
     print(animal_list[1].position)
     animal_list[1].move(animal_list, alpha)
     print(animal_list[1].position)
@@ -32,18 +59,19 @@ def main():
 
 # Creating an object called Animal
 class Animal:
-    def __init__(self, name, position, direction, speed=0):
+    def __init__(self, name, position, direction, speed, error):
         self.name = name
         self.position = position
         self.direction = direction
         self.speed = speed
+        self.error = error
 
     def getNeighborVectors(self, neighbor_list):
         vectors = [np.subtract(o.position, self.position) for o in neighbor_list]
         return vectors
 
     def move(self, animal_list, alpha):
-        neighbor_list = animal_list
+        neighbor_list = animal_list.copy()
         neighbor_list.remove(self)
         neighbor_vectors = self.getNeighborVectors(neighbor_list)
         within_alpha = [v for v in neighbor_vectors if getHypotenuse(v) < alpha]
@@ -51,31 +79,44 @@ class Animal:
             unit_vectors = [None] * len(within_alpha)
             for i in range(len(within_alpha)):
                 unit_vectors[i] = unitVectorize(within_alpha[i])
-            self.direction = unitVectorize(-1 * sum(unit_vectors))
-            self.position = self.direction * self.speed + self.position
+            self.direction = unitVectorize(np.multiply(-1, sum(unit_vectors)))
         else:
             print("attraction")
             self.attraction(neighbor_vectors, neighbor_list)
+        self.position = self.direction * self.speed + self.position
 
     def attraction(self, neighbor_vectors, neighbor_list):
         self.direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
-        self.position = self.direction * self.speed + self.position
 
 class informedAnimal(Animal):
-    def __init__(self, name, position, direction, speed=0, omega):
-        Animal.__init__(self, name, position, direction, speed=0)
-        self.speed = speed
+    def __init__(self, name, position, direction, speed, error, omega, target_list):
+        Animal.__init__(self, name, position, direction, speed, error)
         self.omega = omega
+        self.target_list = target_list
+        self.target = None
 
-    def informedAttraction(self, neighbor_vectors, neighbor_list, direction, omega):
-        targetDestination = [uniform(0, 10), uniform(0, 10)]
-        self.direction = [np.subtract(targetDestination, self.position)] + omega*unitVectorize(direction)/unitVectorize([np.subtract(targetDestination, self.position)] + omega*unitVectorize(direction))
+    def attraction(self, neighbor_vectors, neighbor_list):
+        if (self.target == None):
+            self.target = choice(self.targetList).position
+        targetDirection = getHypotenuse(np.subtract(self.position, self.target))
+
+        self.direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
+        self.direction = unitVectorize(np.sum(self.direction, np.multiply(self.omega, targetDirection)))
+
+class Target:
+    def __init__(self, name, position = None):
+        self.name = name
+        self.position = position
+
+        if (position == None):
+            self.position = choice([-1,1],2)*[uniform(5, 20), uniform(5, 20)]
+        self.position = position
+
 
 # This small function helps us determine the x and y direction vectors. This will be a unit vector.
 def randomDirection():
     radians = uniform(0, 2 * pi)
     return [cos(radians), sin(radians)]
-
 
 # this small function helps us determine the coordinates of each animal
 def getPositions(animal_list):
@@ -88,10 +129,8 @@ def getDirections(animal_list):
 def getHypotenuse(movement_vector):
     return (movement_vector[0] ** 2 + movement_vector[1] ** 2) ** 0.5
 
-
 def unitVectorize(vector):
     magnitude = getHypotenuse(vector)
     return vector / magnitude
-
 
 main()
