@@ -31,6 +31,11 @@ def main():
     error = input("Please enter the standard deviation of movement error: ")
     error = float(error)
 
+    # The user inputs the number of time steps
+    steps = input("Please enter the number of steps for which the simulation should run: ")
+    steps = int(steps)
+    all_positions = dict()
+
     targetDestination_list = []
     for num in range(0, num_targets):
         targetDestination_list.append(Target('TARGET' + str(num), [uniform(0, 10), uniform(0, 10)]))
@@ -41,7 +46,6 @@ def main():
 
     for num in range(num_informed):
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
-        target = [0,0]
         animal_list.append(informedAnimal('ANIMAL' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error, omega, targetDestination_list))
 
     for num in range(num_uninformed):
@@ -49,13 +53,15 @@ def main():
         animal_list.append(Animal('ANIMAL' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error))
 
 
-    print(animal_list)
-    print(animal_list[1].position)
-    for animal in animal_list:
-        animal.move(animal_list, alpha)
-    for animal in animal_list:
-        animal.position = animal.new_position
-        animal.direction = animal.new_direction
+
+    for i in range(steps):
+        all_positions[i] = [o.position for o in animal_list]
+        for animal in animal_list:
+            animal.move(animal_list, alpha)
+        for animal in animal_list:
+            animal.position = animal.new_position
+            animal.direction = animal.new_direction
+    print(all_positions)
 
 # Creating an object called Animal
 class Animal:
