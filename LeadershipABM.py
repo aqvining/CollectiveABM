@@ -17,7 +17,7 @@ def main():
     num_informed = int(num_informed)
 
     #The user inputs omega (strength of target direction on informed movement, between 0 and 1)
-    omega = float(input("Please enter the omega value for informed Animals"))
+    omega = float(input("Please enter the omega value for informed Animals: "))
 
     # The user inputs the alpha (the minimum distance value)
     alpha = input("Please enter the alpha: ")
@@ -39,24 +39,23 @@ def main():
     # creating a list with all the respective parameters
     animal_list = []
 
-    for num in range(0, num_informed):
+    for num in range(num_informed):
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
         target = [0,0]
         animal_list.append(informedAnimal('ANIMAL' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error, omega, targetDestination_list))
 
-    for num in range(0, num_uninformed):
+    for num in range(num_uninformed):
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
         animal_list.append(Animal('ANIMAL' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error))
 
 
     print(animal_list)
-    print(targetDestination_list[1].name)
     print(animal_list[1].position)
-    animal_list[1].move(animal_list, alpha)
-    print(animal_list[1].position)
-    print(animal_list[1].new_position)
-    print(animal_list)
-
+    for animal in animal_list:
+        animal.move(animal_list, alpha)
+    for animal in animal_list:
+        animal.position = animal.new_position
+        animal.direction = animal.new_direction
 
 # Creating an object called Animal
 class Animal:
@@ -82,7 +81,6 @@ class Animal:
                 unit_vectors[i] = unitVectorize(within_alpha[i])
             self.new_direction = unitVectorize(-1 * sum(unit_vectors))
         else:
-            print("attraction")
             self.attraction(neighbor_vectors, neighbor_list)
         self.new_position = self.new_direction * self.speed + self.position
 
