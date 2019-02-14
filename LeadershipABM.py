@@ -63,7 +63,7 @@ def main():
             animal.direction = animal.new_direction
     print(all_positions)
 
-# Creating an object called Animal
+# Creating an object called Animal. All animals have a name, position, inherent direction and speed.
 class Animal:
     def __init__(self, name, position, direction, speed, error):
         self.name = name
@@ -93,6 +93,10 @@ class Animal:
     def attraction(self, neighbor_vectors, neighbor_list):
         self.new_direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
 
+# informed animals are a subclass of Animal. They know a the positions and names of targets.
+# in addition to the knowledge of targets, informed animals also have the ability to draw the other animals in the group
+# with a strength term (omega)
+
 class informedAnimal(Animal):
     def __init__(self, name, position, direction, speed, error, omega, target_list):
         Animal.__init__(self, name, position, direction, speed, error)
@@ -108,6 +112,7 @@ class informedAnimal(Animal):
         self.new_direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
         self.new_direction = unitVectorize(self.new_direction + self.omega * targetDirection)
 
+# This is the Target class. A target is a named point, outside the distribution of animals with a uniform and random distribution.
 class Target:
     def __init__(self, name, position = None):
         self.name = name
@@ -127,16 +132,19 @@ def randomDirection():
 def getPositions(animal_list):
     return [o.position for o in animal_list]
 
+# this small function helps us determine the inherent direction of each animal in animalList
 def getDirections(animal_list):
     return [o.direction for o in animal_list]
 
 # this small function returns the distances of the other animals to a chosen animal
 def getHypotenuse(movement_vector):
     return (movement_vector[0] ** 2 + movement_vector[1] ** 2) ** 0.5
-
+# this small function unit vectorises its input vector
 def unitVectorize(vector):
     magnitude = getHypotenuse(vector)
     return vector / magnitude
 
 
 main()
+
+
