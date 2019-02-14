@@ -62,6 +62,7 @@ def main():
             animal.position = animal.new_position
             animal.direction = animal.new_direction
     print(all_positions)
+    return(all_positions)
 
 # Creating an object called Animal. All animals have a name, position, inherent direction and speed.
 class Animal:
