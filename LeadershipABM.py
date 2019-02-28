@@ -8,6 +8,7 @@ from math import sqrt
 
 
 def main():
+
     # The user inputs the number of uninformed Animal Objects
     num_uninformed = input("Please enter the number of uninformed Animals: ")
     num_uninformed = int(num_uninformed)
@@ -63,6 +64,8 @@ def main():
             animal.direction = animal.new_direction
     print(all_positions)
     return(all_positions)
+
+
 
 # Creating an object called Animal. All animals have a name, position, inherent direction and speed.
 class Animal:
@@ -145,7 +148,11 @@ def unitVectorize(vector):
     magnitude = getHypotenuse(vector)
     return vector / magnitude
 
-
+def plotTimestep(all_positions,key):
+    x = [o[0] for o in all_positions[key]]
+    y = [o[1] for o in all_positions[key]]
+    plt.scatter(x, y)
+    plt.show()
 main()
 
 
