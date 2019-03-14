@@ -10,31 +10,38 @@ from math import sqrt
 def main():
 
     # The user inputs the number of uninformed Animal Objects
-    num_uninformed = input("Please enter the number of uninformed Animals: ")
-    num_uninformed = int(num_uninformed)
+    # num_uninformed = input("Please enter the number of uninformed Animals: ")
+    # num_uninformed = int(num_uninformed)
+    num_uninformed = 10
 
     # The user inputs the number of uninformed Animal Objects
-    num_informed = input("Please enter the number of informed Animals: ")
-    num_informed = int(num_informed)
+    # num_informed = input("Please enter the number of informed Animals: ")
+    # num_informed = int(num_informed)
+    num_informed = 1
 
     #The user inputs omega (strength of target direction on informed movement, between 0 and 1)
-    omega = float(input("Please enter the omega value for informed Animals: "))
+    # omega = float(input("Please enter the omega value for informed Animals: "))
+    omega = 0.5
 
     # The user inputs the alpha (the minimum distance value)
-    alpha = input("Please enter the alpha: ")
-    alpha = float(alpha)
+    # alpha = input("Please enter the alpha: ")
+    #alpha = float(alpha)
+    alpha = 0.1
 
     # The user inputs the alpha (the minimum distance value)
-    num_targets = input("Please enter the number of targets: ")
-    num_targets = int(num_targets)
+    # num_targets = input("Please enter the number of targets: ")
+    # num_targets = int(num_targets)
+    num_targets = 1
 
     # The user inputs the error
-    error = input("Please enter the standard deviation of movement error: ")
-    error = float(error)
+    # error = input("Please enter the standard deviation of movement error: ")
+    # error = float(error)
+    error = 0.5
 
     # The user inputs the number of time steps
-    steps = input("Please enter the number of steps for which the simulation should run: ")
-    steps = int(steps)
+    # steps = input("Please enter the number of steps for which the simulation should run: ")
+    # steps = int(steps)
+    steps = 10
     all_positions = dict()
 
     targetDestination_list = []
@@ -47,16 +54,22 @@ def main():
 
     for num in range(num_informed):
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
-        animal_list.append(informedAnimal('ANIMAL' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error, omega, targetDestination_list))
+        animal_list.append(informedAnimal('Informed' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error, omega, targetDestination_list))
 
     for num in range(num_uninformed):
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
-        animal_list.append(Animal('ANIMAL' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error))
+        animal_list.append(Animal('Uninformed' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error))
 
+
+
+    agentNames = [o.name for o in animal_list]
+    all_agents = {i: list() for i in agentNames}
 
 
     for i in range(steps):
         all_positions[i] = [o.position for o in animal_list]
+        for o in animal_list:
+            all_agents[o.name].append(o.position)
         for animal in animal_list:
             animal.move(animal_list, alpha)
         for animal in animal_list:
@@ -153,6 +166,11 @@ def plotTimestep(all_positions,key):
     y = [o[1] for o in all_positions[key]]
     plt.scatter(x, y)
     plt.show()
+
+def allGraphs(all_positions, steps):
+    for i in range(steps):
+        plotTimestep(all_positions, i)
+
 main()
 
 
