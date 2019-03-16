@@ -76,7 +76,9 @@ def main():
             animal.position = animal.new_position
             animal.direction = animal.new_direction
     print(all_positions)
-    return(all_positions)
+    print(all_agents)
+    #return(all_positions)
+    return (all_agents)
 
 
 
@@ -160,11 +162,16 @@ def getHypotenuse(movement_vector):
 def unitVectorize(vector):
     magnitude = getHypotenuse(vector)
     return vector / magnitude
-
 def plotTimestep(all_positions,key):
     x = [o[0] for o in all_positions[key]]
     y = [o[1] for o in all_positions[key]]
     plt.scatter(x, y)
+    plt.show()
+
+def plotAgents(all_agents,key):
+    x = [o[0] for o in all_agents[key]]
+    y = [o[1] for o in all_agents[key]]
+    plt.scatter (x,y)
     plt.show()
 
 def allGraphs(all_positions, steps):
