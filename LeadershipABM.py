@@ -52,7 +52,7 @@ def main():
     # creating a list with all the respective parameters
     animal_list = []
 
-    for num in range(num_informed):
+    for num in range(num_informed): #descriptive arguments
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
         animal_list.append(informedAnimal('Informed' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error, omega, targetDestination_list))
 
@@ -78,7 +78,7 @@ def main():
     print(all_positions)
     print(all_agents)
     #return(all_positions)
-    return (all_agents)
+    return (all_positions, all_agents)
 
 
 
@@ -90,6 +90,7 @@ class Animal:
         self.direction = direction
         self.speed = speed
         self.error = error
+        self.new_direction = None
 
     def getNeighborVectors(self, neighbor_list):
         vectors = [np.subtract(o.position, self.position) for o in neighbor_list]
@@ -178,6 +179,6 @@ def allGraphs(all_positions, steps):
     for i in range(steps):
         plotTimestep(all_positions, i)
 
-main()
-
+run = main()
+plotTimestep(run[0], 1)
 
