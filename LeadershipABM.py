@@ -111,7 +111,7 @@ class Animal:
         self.new_position = self.new_direction * self.speed + self.position
 
     def attraction(self, neighbor_vectors, neighbor_list):
-        self.new_direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
+        self.new_direction = unitVectorize(sum(neighbor_vectors) + sum(getDirections(neighbor_list)))
 
 # informed animals are a subclass of Animal. They know a the positions and names of targets.
 # in addition to the knowledge of targets, informed animals also have the ability to draw the other animals in the group
@@ -129,7 +129,7 @@ class informedAnimal(Animal):
             self.target = choice(self.target_list).position
         targetDirection = unitVectorize(np.subtract(self.position, self.target))
 
-        self.new_direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list), axis = 0))
+        self.new_direction = unitVectorize(sum(neighbor_vectors) + sum(getDirections(neighbor_list)))
         self.new_direction = unitVectorize(self.new_direction + self.omega * targetDirection)
 
 # This is the Target class. A target is a named point, outside the distribution of animals with a uniform and random distribution.
@@ -172,7 +172,7 @@ def plotTimestep(all_positions,key):
 def plotAgents(all_agents,key):
     x = [o[0] for o in all_agents[key]]
     y = [o[1] for o in all_agents[key]]
-    plt.scatter (x,y)
+    plt.plot(x,y)
     plt.show()
 
 def allGraphs(all_positions, steps):
