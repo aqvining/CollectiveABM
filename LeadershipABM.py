@@ -3,9 +3,10 @@ import collections
 import numpy as np
 from math import pi
 import matplotlib.pyplot as plt
+from matplotlib import animation
 from math import acos, sin, cos, degrees, atan2
 from math import sqrt
-
+import time
 
 def main():
 
@@ -21,7 +22,7 @@ def main():
 
     #The user inputs omega (strength of target direction on informed movement, between 0 and 1)
     # omega = float(input("Please enter the omega value for informed Animals: "))
-    omega = 0.5
+    omega = 1
 
     # The user inputs the alpha (the minimum distance value)
     # alpha = input("Please enter the alpha: ")
@@ -41,12 +42,12 @@ def main():
     # The user inputs the number of time steps
     # steps = input("Please enter the number of steps for which the simulation should run: ")
     # steps = int(steps)
-    steps = 10
+    steps = 100
     all_positions = dict()
 
     targetDestination_list = []
     for num in range(0, num_targets):
-        targetDestination_list.append(Target('TARGET' + str(num), [uniform(0, 10), uniform(0, 10)]))
+        targetDestination_list.append(Target('TARGET' + str(num), [uniform(5, 10), uniform(5, 10)]))
 
     # A list of animals, each having their own individual parameters of name, position, direction, and speed
     # creating a list with all the respective parameters
@@ -127,7 +128,7 @@ class informedAnimal(Animal):
     def attraction(self, neighbor_vectors, neighbor_list):
         if (self.target == None):
             self.target = choice(self.target_list).position
-        targetDirection = unitVectorize(np.subtract(self.position, self.target))
+        targetDirection = unitVectorize(np.subtract(self.target, self.position))
 
         self.new_direction = unitVectorize(sum(neighbor_vectors) + sum(getDirections(neighbor_list)))
         self.new_direction = unitVectorize(self.new_direction + self.omega * targetDirection)
@@ -179,6 +180,27 @@ def allGraphs(all_positions, steps):
     for i in range(steps):
         plotTimestep(all_positions, i)
 
-run = main()
-plotTimestep(run[0], 1)
 
+
+
+run = main()
+#plotTimestep(run[0], 1)
+
+fig = plt.figure()
+ax = plt.axes(xlim=(-5, 10), ylim=(-5,10))
+paths = [plt.plot([], [])[0] for _ in range(len(run[1]))]
+def animate_init():
+    for path in paths:
+        path.set_data([],[])
+    return paths
+
+def animate(i):
+    for j, agent in enumerate(run[1]):
+        x = [position[0] for position in run[1][agent][:i]]
+        y = [position[1] for position in run[1][agent][:i]]
+        paths[j].set_data(x,y)
+    return paths
+
+anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 500, blit = True)
+
+plt.show()
