@@ -127,9 +127,9 @@ class informedAnimal(Animal):
     def attraction(self, neighbor_vectors, neighbor_list):
         if (self.target == None):
             self.target = choice(self.target_list).position
-        targetDirection = getHypotenuse(np.subtract(self.position, self.target))
+        targetDirection = unitVectorize(np.subtract(self.position, self.target))
 
-        self.new_direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list)))
+        self.new_direction = unitVectorize(unitVectorize(sum(neighbor_vectors)) + np.sum(getDirections(neighbor_list), axis = 0))
         self.new_direction = unitVectorize(self.new_direction + self.omega * targetDirection)
 
 # This is the Target class. A target is a named point, outside the distribution of animals with a uniform and random distribution.
