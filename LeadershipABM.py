@@ -47,7 +47,7 @@ def main():
 
     targetDestination_list = []
     for num in range(0, num_targets):
-        targetDestination_list.append(Target('TARGET' + str(num), [uniform(5, 10), uniform(5, 10)]))
+        targetDestination_list.append(Target('TARGET' + str(num)))
 
     # A list of animals, each having their own individual parameters of name, position, direction, and speed
     # creating a list with all the respective parameters
@@ -126,7 +126,7 @@ class informedAnimal(Animal):
         self.target = None
 
     def attraction(self, neighbor_vectors, neighbor_list):
-        if (self.target == None):
+        if self.target is None:
             self.target = choice(self.target_list).position
         targetDirection = unitVectorize(np.subtract(self.target, self.position))
 
@@ -135,13 +135,12 @@ class informedAnimal(Animal):
 
 # This is the Target class. A target is a named point, outside the distribution of animals with a uniform and random distribution.
 class Target:
-    def __init__(self, name, position = None):
+    def __init__(self, name, position=None):
         self.name = name
         self.position = position
 
-        if (position == None):
-            self.position = choice([-1,1],2)*[uniform(5, 20), uniform(5, 20)]
-        self.position = position
+        if self.position is None:
+            self.position = np.random.choice([-1,1],size=2)*[uniform(5, 20), uniform(5, 20)]
 
 
 # This small function helps us determine the x and y direction vectors. This will be a unit vector.
@@ -195,9 +194,12 @@ def animate_init():
     return paths
 
 def animate(i):
+    k = i-4
+    if k<0:
+        k = 0
     for j, agent in enumerate(run[1]):
-        x = [position[0] for position in run[1][agent][:i]]
-        y = [position[1] for position in run[1][agent][:i]]
+        x = [position[0] for position in run[1][agent][k:i]]
+        y = [position[1] for position in run[1][agent][k:i]]
         paths[j].set_data(x,y)
     return paths
 
