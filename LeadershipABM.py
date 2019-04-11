@@ -8,6 +8,7 @@ from math import acos, sin, cos, degrees, atan2
 from math import sqrt
 import time
 
+
 def main():
 
     # The user inputs the number of uninformed Animal Objects
@@ -79,7 +80,7 @@ def main():
     print(all_positions)
     print(all_agents)
     #return(all_positions)
-    return (all_positions, all_agents)
+    return (all_positions, all_agents, targetDestination_list)
 
 
 
@@ -186,8 +187,11 @@ run = main()
 #plotTimestep(run[0], 1)
 
 fig = plt.figure()
-ax = plt.axes(xlim=(-5, 10), ylim=(-5,10))
+ax = plt.axes(xlim=(-20, 20), ylim=(-20,20))
 paths = [plt.plot([], [])[0] for _ in range(len(run[1]))]
+target_x = [target.position[0] for target in run[2]]
+target_y = [target.position[1] for target in run[2]]
+target = ax.scatter(target_x,target_y)
 def animate_init():
     for path in paths:
         path.set_data([],[])
@@ -201,8 +205,11 @@ def animate(i):
         x = [position[0] for position in run[1][agent][k:i]]
         y = [position[1] for position in run[1][agent][k:i]]
         paths[j].set_data(x,y)
+    x = [target.position[0] for target in run[2]]
+    y = [target.position[1] for target in run[2]]
+    plt.scatter(x,y)
     return paths
 
-anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 500, blit = True)
-
+anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 100, blit = True)
+anim.save('collective_animation.gif', writer='imagemagick', fps=60)
 plt.show()
