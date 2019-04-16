@@ -5,20 +5,23 @@ from math import pi
 import matplotlib.pyplot as plt
 from matplotlib import animation
 from math import acos, sin, cos, degrees, atan2
+import scipy.stats as ss
+import statistics
 from math import sqrt
 import time
 
-def main():
+def main(N,I):
 
     # The user inputs the number of uninformed Animal Objects
     # num_uninformed = input("Please enter the number of uninformed Animals: ")
     # num_uninformed = int(num_uninformed)
-    num_uninformed = 10
+    num_uninformed = N-I
 
     # The user inputs the number of uninformed Animal Objects
     # num_informed = input("Please enter the number of informed Animals: ")
     # num_informed = int(num_informed)
-    num_informed = 1
+    #num_informed = 1
+    num_informed = I
 
     #The user inputs omega (strength of target direction on informed movement, between 0 and 1)
     # omega = float(input("Please enter the omega value for informed Animals: "))
@@ -37,7 +40,8 @@ def main():
     # The user inputs the error
     # error = input("Please enter the standard deviation of movement error: ")
     # error = float(error)
-    error = 0.5
+    #error = 0.5
+
 
     # The user inputs the number of time steps
     # steps = input("Please enter the number of steps for which the simulation should run: ")
@@ -55,11 +59,11 @@ def main():
 
     for num in range(num_informed): #descriptive arguments
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
-        animal_list.append(informedAnimal('Informed' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error, omega, targetDestination_list))
+        animal_list.append(informedAnimal('Informed' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, ss.vonmises.rvs(10000, size = 1), omega, targetDestination_list))
 
     for num in range(num_uninformed):
         rand_speed = 1  # For now, setting the speed of all the animals in the list to 1
-        animal_list.append(Animal('Uninformed' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, error))
+        animal_list.append(Animal('Uninformed' + str(num), np.array([uniform(-5, 5), uniform(-5, 5)]), randomDirection(), rand_speed, ss.vonmises.rvs(10000, size = 1)))
 
 
 
@@ -76,8 +80,7 @@ def main():
         for animal in animal_list:
             animal.position = animal.new_position
             animal.direction = animal.new_direction
-    print(all_positions)
-    print(all_agents)
+
     #return(all_positions)
     return (all_positions, all_agents)
 
@@ -109,10 +112,12 @@ class Animal:
             self.new_direction = unitVectorize(-1 * sum(unit_vectors))
         else:
             self.attraction(neighbor_vectors, neighbor_list)
+        # self.new_direction = atan2(self.new_direction[1], self.new_direction[0]) + self.error
         self.new_position = self.new_direction * self.speed + self.position
 
     def attraction(self, neighbor_vectors, neighbor_list):
-        self.new_direction = unitVectorize(sum(neighbor_vectors) + sum(getDirections(neighbor_list)))
+       self.new_direction = unitVectorize(sum(neighbor_vectors) + sum(getDirections(neighbor_list)))
+
 
 # informed animals are a subclass of Animal. They know a the positions and names of targets.
 # in addition to the knowledge of targets, informed animals also have the ability to draw the other animals in the group
@@ -132,6 +137,8 @@ class informedAnimal(Animal):
 
         self.new_direction = unitVectorize(sum(neighbor_vectors) + sum(getDirections(neighbor_list)))
         self.new_direction = unitVectorize(self.new_direction + self.omega * targetDirection)
+        # self.new_direction = atan2(self.new_direction[1], self.new_direction[0]) + self.error
+
 
 # This is the Target class. A target is a named point, outside the distribution of animals with a uniform and random distribution.
 class Target:
@@ -183,24 +190,57 @@ def allGraphs(all_positions, steps):
 
 
 
-run = main()
-#plotTimestep(run[0], 1)
+# run = main()
+# #plotTimestep(run[0], 1)
+#
+# fig = plt.figure()
+# ax = plt.axes(xlim=(-5, 10), ylim=(-5,10))
+# paths = [plt.plot([], [])[0] for _ in range(len(run[1]))]
+#
+# def animate_init():
+#     for path in paths:
+#         path.set_data([],[])
+#     return paths
+#
+# def animate(i):
+#     for j, agent in enumerate(run[1]):
+#         x = [position[0] for position in run[1][agent][:i]]
+#         y = [position[1] for position in run[1][agent][:i]]
+#         paths[j].set_data(x,y)
+#     return paths
 
-fig = plt.figure()
-ax = plt.axes(xlim=(-5, 10), ylim=(-5,10))
-paths = [plt.plot([], [])[0] for _ in range(len(run[1]))]
-def animate_init():
-    for path in paths:
-        path.set_data([],[])
-    return paths
+# def numLeaders(numAnimals, start, stop, step=1):
+#     n = int(round((stop - start)/float(step)))
+#     if n > 1:
+#         step = ([start + step*i for i in range(n+1)])
+#         numInformed = [numAnimals * x for x in step]
+#         numInformed = np.round(numInformed, 2)
+#         numInformed = np.int_(numInformed)
+#         return(numInformed)
+#     elif n == 1:
+#         step = (([start]))
+#         numInformed = [numAnimals * x for x in step]
+#         numInformed = np.round(numInformed, 2)
+#         numInformed = np.int_(numInformed)
+#         return(numInformed)
+#     else:
+#         step = ([])
+#         numInformed = [numAnimals * x for x in step]
+#         numInformed = np.round(numInformed, 2)
+#         numInformed = np.int_(numInformed)
+#         return(numInformed)
 
-def animate(i):
-    for j, agent in enumerate(run[1]):
-        x = [position[0] for position in run[1][agent][:i]]
-        y = [position[1] for position in run[1][agent][:i]]
-        paths[j].set_data(x,y)
-    return paths
+all_data = {10:{},30:{},50:{},100:{},200:{}} #initializing a list with size 5 because N = 10,30,50,100, 200 in Couzin paper
 
-anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 500, blit = True)
 
-plt.show()
+for N in [10,30,50,100,200]:
+    print("Entering: N = ", N)
+    for I in range(1,N+1):
+        all_data[N][I] = main(N, I)
+
+
+
+
+# anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 500, blit = True)
+#
+# plt.show()
