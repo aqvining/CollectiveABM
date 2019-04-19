@@ -68,12 +68,14 @@ def main(N,I):
 
 
     all_directions = {i: list() for i in range(0, steps)}
+    all_elongation = {i: list() for i in range (0,steps)}
 
     agentNames = [o.name for o in animal_list]
     all_agents = {i: list() for i in agentNames}
     for i in range(steps):
         all_positions[i] = [o.position for o in animal_list]
         all_directions[i] = np.sum([o.direction for o in animal_list], axis=0)
+        all_elongation[i] = getElongation([o.position for o in animal_list], [o.direction for o in animal_list])
         for o in animal_list:
             all_agents[o.name].append(o.position)
         for animal in animal_list:
@@ -82,7 +84,7 @@ def main(N,I):
             animal.position = animal.new_position
             animal.direction = animal.new_direction
 
-    return (all_positions, all_agents, all_directions)
+    return (all_positions, all_agents, all_directions, all_elongation)
 
 
 
@@ -172,6 +174,9 @@ def getElongation(positions, direction):
     wdistances = [getDistFromLine(centroid, direction_point, position) for position in positions]
     perpendicular_point = [centroid[0]-direction_axis[1], direction_axis[0]+centroid[1]]
     ldistances = [getDistFromLine(centroid, perpendicular_point, position) for position in positions]
+
+    elongation = max(wdistances)-min(ldistances)
+    return elongation
 
 
 def getDistFromLine(p1, p2, p3):   ##p1 and p2 are points on the line
