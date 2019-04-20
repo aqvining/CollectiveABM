@@ -25,12 +25,12 @@ def main(N,I):
 
     #The user inputs omega (strength of target direction on informed movement, between 0 and 1)
     # omega = float(input("Please enter the omega value for informed Animals: "))
-    omega = 1
+    omega = 0.5
 
     # The user inputs the alpha (the minimum distance value)
     # alpha = input("Please enter the alpha: ")
     #alpha = float(alpha)
-    alpha = 0.1
+    alpha = 1
 
     # The user inputs the alpha (the minimum distance value)
     # num_targets = input("Please enter the number of targets: ")
@@ -46,7 +46,7 @@ def main(N,I):
     # The user inputs the number of time steps
     # steps = input("Please enter the number of steps for which the simulation should run: ")
     # steps = int(steps)
-    steps = 100
+    steps = 2500
 
     all_positions = dict()
 
@@ -74,8 +74,7 @@ def main(N,I):
     all_agents = {i: list() for i in agentNames}
     for i in range(steps):
         all_positions[i] = [o.position for o in animal_list]
-        all_directions[i] = np.sum([o.direction for o in animal_list], axis=0)
-        all_elongation[i] = getElongation([o.position for o in animal_list], [o.direction for o in animal_list])
+        all_directions[i] = [o.direction for o in animal_list]
         for o in animal_list:
             all_agents[o.name].append(o.position)
         for animal in animal_list:
@@ -84,8 +83,13 @@ def main(N,I):
             animal.position = animal.new_position
             animal.direction = animal.new_direction
 
-    return (all_positions, all_agents, all_directions, all_elongation)
+    groupDirection = np.subtract(getCentroid(all_positions[steps-1]), getCentroid(all_positions[50]))
+    for i in range(steps):
+        all_elongation[i] = getElongation(all_positions[i], groupDirection)
 
+    s = getMeanAngularDev(all_directions,groupDirection)
+
+    return (all_positions, all_agents, all_directions, all_elongation, normalize(s))
 
 
 # Creating an object called Animal. All animals have a name, position, inherent direction and speed.
@@ -149,7 +153,7 @@ class Target:
         self.position = position
 
         if (position == None):
-            self.position = choice([-1,1],2)*[uniform(5, 20), uniform(5, 20)]
+            self.position = np.multiply(randomDirection(), 10000)
         self.position = position
 
 
@@ -162,20 +166,24 @@ def randomDirection():
 def getPositions(animal_list):
     return [o.position for o in animal_list]
 
-def getElongation(positions, direction):
+def getCentroid(positions):
     x_coords = [p[0] for p in positions]
     y_coords = [p[1] for p in positions]
     _len = len(positions)
     centroid_x = sum(x_coords) / _len
     centroid_y = sum(y_coords) / _len
     centroid = [centroid_x, centroid_y]
+    return centroid
 
+def getElongation(positions, direction):
+    centroid = getCentroid(positions)
     direction_point = np.sum([direction, centroid], axis=0)
     wdistances = [getDistFromLine(centroid, direction_point, position) for position in positions]
-    perpendicular_point = [centroid[0]-direction_axis[1], direction_axis[0]+centroid[1]]
+    perpendicular_point = [centroid[0]-direction_point[1], direction_point[0]+centroid[1]]
     ldistances = [getDistFromLine(centroid, perpendicular_point, position) for position in positions]
 
-    elongation = max(wdistances)-min(ldistances)
+    elongation = (max(ldistances) - min(ldistances))/(max(wdistances) - min(wdistances))
+
     return elongation
 
 
@@ -184,10 +192,6 @@ def getDistFromLine(p1, p2, p3):   ##p1 and p2 are points on the line
     #if (p3[1]<p1[1]+(p1[0]-p3[0])*((p2[1]-p1[1])/(p2[0]-p1[0]))):
         #return dist * -1
     return dist
-
-
-
-
 
 # this small function helps us determine the inherent direction of each animal in animalList
 def getDirections(animal_list):
@@ -217,9 +221,29 @@ def allGraphs(all_positions, steps):
         plotTimestep(all_positions, i)
 
 
+def getMeanAngularDev(all_directions,groupDirection):
+    complete_directions = []
+    for key in all_directions.keys():
+        complete_directions += all_directions[key]
+    groupAngle = atan2(groupDirection[1], groupDirection[0])
+    angularDev =  [groupAngle - atan2(direction[1], direction[0]) for direction in complete_directions]
 
+    A = 0
+    B = 0
 
-# run = main()
+    for a in angularDev:
+        A += cos(a)
+        B += sin(a)
+    A = A/len(complete_directions)
+    B = B/len(complete_directions)
+    r = sqrt(A**2+B**2)
+    s = sqrt(2*(1-r))
+    return s
+
+def normalize(s):
+    return abs(s - pi)/pi
+
+#run = main(10,1)
 # #plotTimestep(run[0], 1)
 #
 # fig = plt.figure()
@@ -262,13 +286,23 @@ def allGraphs(all_positions, steps):
 ##all_data = {10:{},30:{},50:{},100:{},200:{}} #initializing a list with size 5 because N = 10,30,50,100, 200 in Couzin paper
 
 
-##for N in [10,30,50,100,200]:
-##    print("Entering: N = ", N)
-##    for I in range(1,N+1):
-##        all_data[N][I] = main(N, I)
+for N in [10,30,50,100,200]:
+    print("Entering: N = ", N)
+    for I in range(1,N+1):
+        all_data[N][I] = main(N, I)
 
+def plotAccuracy(all_data):
+    #plt.figure()
+    for N in all_data.keys():
+        x = []
+        y = []
+        for I in all_data[N].keys():
+            x.append(I/N)
+            y.append(all_data[N][I][4])
+        plt.plot(x, y)
+    plt.show()
 
-
+plotAccuracy(all_data)
 
 # anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 500, blit = True)
 #
