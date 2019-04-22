@@ -8,6 +8,7 @@ from math import acos, sin, cos, degrees, atan2
 import scipy.stats as ss
 import statistics
 from math import sqrt
+import pickle
 import time
 
 def main(N,I):
@@ -283,13 +284,15 @@ def normalize(s):
 #         numInformed = np.int_(numInformed)
 #         return(numInformed)
 
-##all_data = {10:{},30:{},50:{},100:{},200:{}} #initializing a list with size 5 because N = 10,30,50,100, 200 in Couzin paper
+all_data = {10:{},30:{},50:{},100:{}} #initializing a list with size 5 because N = 10,30,50,100, 200 in Couzin paper
+filehandler = open("simulation.obj", 'w')
 
-
-for N in [10,30,50,100,200]:
+for N in [10,30,50,100]:
     print("Entering: N = ", N)
-    for I in range(1,N+1):
+    for I in range(1, N+1):
+        #print("Entering: I = ", I)
         all_data[N][I] = main(N, I)
+pickle.dump(all_data, filehandler)
 
 def plotAccuracy(all_data):
     #plt.figure()
@@ -300,7 +303,26 @@ def plotAccuracy(all_data):
             x.append(I/N)
             y.append(all_data[N][I][4])
         plt.plot(x, y)
+    fig.suptitle('Group Accuracy vs. Proportion of Informed Individuals', fontsize=20)
+    plt.xlabel('Proportion of Informed Individuals', fontsize=18)
+    plt.ylabel('Group Accuracy', fontsize=16)
     plt.show()
+
+def plotElongation(all_data):
+    #plt.figure()
+    for N in all_data.keys():
+        x = []
+        y = []
+        for I in all_data[N].keys():
+            x.append(I/N)
+            elongations = all_data[N][I][3]
+            y.append(statistics.mean(elongations[key] for key in elongations))
+        plt.plot(x, y)
+    fig.suptitle('Group Elongation vs. Proportion of Informed Individuals', fontsize=20)
+    plt.xlabel('Proportion of Informed Individuals', fontsize=18)
+    plt.ylabel('Group Elongation', fontsize=16)
+    plt.show()
+
 
 plotAccuracy(all_data)
 
