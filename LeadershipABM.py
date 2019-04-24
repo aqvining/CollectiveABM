@@ -9,8 +9,11 @@ import scipy.stats as ss
 import statistics
 from math import sqrt
 import time
+import pickle
+
 
 def main(N,I):
+
 
     # The user inputs the number of uninformed Animal Objects
     # num_uninformed = input("Please enter the number of uninformed Animals: ")
@@ -46,13 +49,13 @@ def main(N,I):
     # The user inputs the number of time steps
     # steps = input("Please enter the number of steps for which the simulation should run: ")
     # steps = int(steps)
-    steps = 2500
+    steps = 1000
 
     all_positions = dict()
 
     targetDestination_list = []
     for num in range(0, num_targets):
-        targetDestination_list.append(Target('TARGET' + str(num), [uniform(5, 10), uniform(5, 10)]))
+        targetDestination_list.append(Target('TARGET' + str(num)))
 
     # A list of animals, each having their own individual parameters of name, position, direction, and speed
     # creating a list with all the respective parameters
@@ -82,6 +85,8 @@ def main(N,I):
         for animal in animal_list:
             animal.position = animal.new_position
             animal.direction = animal.new_direction
+
+
 
     groupDirection = np.subtract(getCentroid(all_positions[steps-1]), getCentroid(all_positions[50]))
     for i in range(steps):
@@ -137,7 +142,7 @@ class informedAnimal(Animal):
         self.target = None
 
     def attraction(self, neighbor_vectors, neighbor_list):
-        if (self.target == None):
+        if self.target is None:
             self.target = choice(self.target_list).position
         targetDirection = unitVectorize(np.subtract(self.target, self.position))
 
@@ -148,13 +153,13 @@ class informedAnimal(Animal):
 
 # This is the Target class. A target is a named point, outside the distribution of animals with a uniform and random distribution.
 class Target:
-    def __init__(self, name, position = None):
+    def __init__(self, name, position=None):
         self.name = name
         self.position = position
 
-        if (position == None):
+        if (self.position is None):
             self.position = np.multiply(randomDirection(), 10000)
-        self.position = position
+
 
 
 # This small function helps us determine the x and y direction vectors. This will be a unit vector.
@@ -283,13 +288,20 @@ def normalize(s):
 #         numInformed = np.int_(numInformed)
 #         return(numInformed)
 
-##all_data = {10:{},30:{},50:{},100:{},200:{}} #initializing a list with size 5 because N = 10,30,50,100, 200 in Couzin paper
+all_data = {10:{},30:{},50:{},100:{},200:{}} #initializing a list with size 5 because N = 10,30,50,100, 200 in Couzin paper
 
 
-for N in [10,30,50,100,200]:
+for N in [10,30,50,100]:
     print("Entering: N = ", N)
     for I in range(1,N+1):
         all_data[N][I] = main(N, I)
+        print("Completed I = ", I)
+
+
+
+f = open("file.pkl","wb")
+pickle.dump(all_data,f)
+f.close()
 
 def plotAccuracy(all_data):
     #plt.figure()
@@ -304,6 +316,39 @@ def plotAccuracy(all_data):
 
 plotAccuracy(all_data)
 
+
+#run = main()
+#plotTimestep(run[0], 1)
+
+# fig = plt.figure()
+# ax = plt.axes(xlim=(-20, 20), ylim=(-20,20))
+# paths = [plt.plot([], [])[0] for _ in range(len(run[1]))]
+# target_x = [target.position[0] for target in run[2]]
+# target_y = [target.position[1] for target in run[2]]
+# target = ax.scatter(target_x,target_y)
+# def animate_init():
+#     for path in paths:
+#         path.set_data([],[])
+#     return paths
+#
+# def animate(i):
+#     k = i-4
+#     if k<0:
+#         k = 0
+#     for j, agent in enumerate(run[1]):
+#         x = [position[0] for position in run[1][agent][k:i]]
+#         y = [position[1] for position in run[1][agent][k:i]]
+#         paths[j].set_data(x,y)
+#     x = [target.position[0] for target in run[2]]
+#     y = [target.position[1] for target in run[2]]
+#     plt.scatter(x,y)
+#     return paths
+
+# anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 100, blit = True)
+# anim.save('collective_animation.gif', writer='imagemagick', fps=60)
+# plt.show()
+
 # anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 500, blit = True)
 #
 # plt.show()
+
