@@ -47,7 +47,7 @@ def main(N,I):
     # The user inputs the number of time steps
     # steps = input("Please enter the number of steps for which the simulation should run: ")
     # steps = int(steps)
-    steps = 2500
+    steps = 500
 
     all_positions = dict()
 
@@ -285,27 +285,32 @@ def normalize(s):
 #         return(numInformed)
 
 all_data = {10:{},30:{},50:{},100:{}} #initializing a list with size 5 because N = 10,30,50,100, 200 in Couzin paper
-filehandler = open("simulation.obj", 'w')
+filehandler = open("simulation.pkl", 'wb')
 
-for N in [10,30,50,100]:
+for N in [10, 30]:
     print("Entering: N = ", N)
     for I in range(1, N+1):
-        #print("Entering: I = ", I)
+        print("Entering: I = ", I)
         all_data[N][I] = main(N, I)
 pickle.dump(all_data, filehandler)
 
 def plotAccuracy(all_data):
     #plt.figure()
+    i=0
     for N in all_data.keys():
         x = []
         y = []
         for I in all_data[N].keys():
             x.append(I/N)
             y.append(all_data[N][I][4])
-        plt.plot(x, y)
-    fig.suptitle('Group Accuracy vs. Proportion of Informed Individuals', fontsize=20)
+        col = ["black", "blue", "green", "yellow"][i]
+        plt.plot(x, y, color = col)
+    i += 1
+    plt.suptitle('Group Accuracy vs. Proportion of Informed Individuals', fontsize=20)
     plt.xlabel('Proportion of Informed Individuals', fontsize=18)
     plt.ylabel('Group Accuracy', fontsize=16)
+    plt.xticks(fontsize = 14)
+    plt.yticks(fontsize = 14)
     plt.show()
 
 def plotElongation(all_data):
@@ -318,13 +323,16 @@ def plotElongation(all_data):
             elongations = all_data[N][I][3]
             y.append(statistics.mean(elongations[key] for key in elongations))
         plt.plot(x, y)
-    fig.suptitle('Group Elongation vs. Proportion of Informed Individuals', fontsize=20)
+    plt.suptitle('Group Elongation vs. Proportion of Informed Individuals', fontsize=20)
     plt.xlabel('Proportion of Informed Individuals', fontsize=18)
     plt.ylabel('Group Elongation', fontsize=16)
+    plt.xticks(fontsize = 14)
+    plt.yticks(fontsize = 14)
     plt.show()
 
 
 plotAccuracy(all_data)
+#plotElongation(all_data)
 
 # anim = animation.FuncAnimation(fig, animate, init_func = animate_init, frames = len(run[0]), interval = 500, blit = True)
 #
